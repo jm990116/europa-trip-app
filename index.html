@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Europa 2025 🌍</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0d1117;--surface:#161b22;--surface2:#1c2128;--surface3:#252d38;
+  --accent:#e8c87a;--accent2:#a78bfa;--text:#e6edf3;--muted:#7d8590;--border:#30363d;
+  --green:#3fb950;--red:#f85149;--blue:#58a6ff;--orange:#fb8f44;
+  --font-display:'Playfair Display',serif;--font-body:'DM Sans',sans-serif;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);max-width:430px;margin:0 auto;min-height:100vh;overflow-x:hidden;font-size:14px}
+.app{display:flex;flex-direction:column;min-height:100vh}
+
+/* Header */
+.header{padding:20px 20px 0;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px);background:rgba(13,17,23,0.95);border-bottom:1px solid var(--border)}
+.header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.header-title{font-family:var(--font-display);font-size:22px;color:var(--accent);letter-spacing:-0.3px}
+.header-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.flag-row{display:flex;gap:4px;align-items:center;font-size:18px}
+
+/* Nav */
+.nav{display:flex;gap:4px;padding-bottom:12px;overflow-x:auto;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nav-btn{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;white-space:nowrap;font-family:var(--font-body);transition:all .2s}
+.nav-btn.active{background:var(--accent);color:#0d1117;border-color:var(--accent)}
+
+/* Content */
+.content{flex:1;padding:16px 20px 90px;overflow-y:auto}
+.section{display:none}.section.active{display:block}
+
+/* Roteiro */
+.day-item{margin-bottom:10px;border-radius:14px;overflow:hidden;border:1px solid var(--border);background:var(--surface)}
+.day-header{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;user-select:none}
+.day-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.day-num{font-family:var(--font-display);font-size:16px;font-weight:600;min-width:28px;color:var(--muted)}
+.day-info{flex:1;min-width:0}
+.day-name{font-size:13px;font-weight:500;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.day-date{font-size:11px;color:var(--muted);margin-top:1px}
+.day-badge{font-size:10px;padding:3px 8px;border-radius:10px;font-weight:500;flex-shrink:0}
+.day-arrow{font-size:10px;color:var(--muted);transition:transform .2s;flex-shrink:0;margin-left:4px}
+.day-item.open .day-arrow{transform:rotate(180deg)}
+.day-body{display:none;border-top:1px solid var(--border)}
+.day-item.open .day-body{display:block}
+.stop{display:flex;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);align-items:flex-start}
+.stop:last-child{border-bottom:none}
+.stop-icon{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;background:var(--surface3)}
+.stop-info{flex:1;min-width:0}
+.stop-name{font-size:13px;font-weight:500}
+.stop-tip{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.4}
+.stop-price{font-size:11px;font-weight:500;flex-shrink:0;margin-top:3px;text-align:right}
+.day-note{padding:10px 14px;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.badge-es{background:#1f2d1a;color:#7ee787}
+.badge-fr{background:#1a1f35;color:#79c0ff}
+.badge-uk{background:#2d1f1a;color:#ffa657}
+.badge-be{background:#2d1a2d;color:#d2a8ff}
+.badge-voo{background:#1c2128;color:#8b949e}
+.badge-livre{background:#2d2416;color:#e3b341}
+.tag-free{color:var(--green)}
+.tag-paid{color:var(--accent)}
+
+/* Mapa */
+.map-container{border-radius:14px;overflow:hidden;border:1px solid var(--border);background:var(--surface);margin-bottom:14px}
+.map-header{padding:12px 14px 0}
+.map-title{font-size:13px;font-weight:500}
+.map-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.map-svg-wrap{width:100%;background:#0a1628;height:300px;overflow:hidden;margin-top:10px}
+.map-svg-wrap svg{width:100%;height:100%}
+.city-dot{cursor:pointer}
+.city-label{font-size:10px;fill:#e6edf3;font-family:'DM Sans',sans-serif;font-weight:500}
+.city-sub-lbl{font-size:8px;fill:#7d8590;font-family:'DM Sans',sans-serif}
+.route-line{stroke:#e8c87a;stroke-width:1.5;fill:none;stroke-dasharray:4,3;opacity:0.6}
+.map-legend{display:flex;gap:10px;padding:10px 14px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.city-info-box{background:var(--surface);border-radius:14px;padding:14px;margin-bottom:14px;border:1px solid var(--border);display:none}
+.city-info-name{font-size:15px;font-weight:500;margin-bottom:4px}
+.city-info-desc{font-size:12px;color:var(--muted);margin-bottom:8px}
+.city-info-tip{font-size:12px;background:var(--surface2);border-radius:8px;padding:8px 10px}
+.stop-card{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface);border-radius:12px;border:1px solid var(--border);margin-bottom:8px}
+.stop-flag{font-size:22px;flex-shrink:0}
+.stop-card-info{flex:1;min-width:0}
+.stop-card-name{font-size:13px;font-weight:500}
+.stop-card-days{font-size:11px;color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stop-card-cost{font-size:12px;font-weight:500;color:var(--accent);flex-shrink:0}
+
+/* Gastos */
+.budget-total{background:var(--surface);border-radius:14px;padding:16px;margin-bottom:14px;border:1px solid var(--border)}
+.budget-lbl{font-size:11px;color:var(--muted);margin-bottom:3px}
+.budget-val{font-family:var(--font-display);font-size:30px;color:var(--accent);font-weight:600;line-height:1.1}
+.budget-brl{font-size:11px;color:var(--muted);margin-top:4px}
+.budget-bar-wrap{margin-top:12px}
+.budget-bar-head{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:5px}
+.budget-bar-bg{height:6px;background:var(--surface3);border-radius:3px;overflow:hidden}
+.budget-bar-fill{height:100%;border-radius:3px;transition:width .5s ease;background:var(--accent)}
+.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.cat-card{background:var(--surface);border-radius:12px;padding:12px;border:1px solid var(--border)}
+.cat-card-lbl{font-size:11px;color:var(--muted);margin-bottom:3px}
+.cat-card-val{font-size:16px;font-weight:500}
+.cat-card-brl{font-size:11px;color:var(--muted);margin-top:1px}
+.add-row{display:flex;gap:6px;margin-bottom:14px}
+.add-row input,.add-row select{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 10px;color:var(--text);font-family:var(--font-body);font-size:13px;outline:none;min-width:0}
+.add-row input:focus,.add-row select:focus{border-color:var(--accent)}
+.add-row .inp-desc{flex:1}
+.add-row .inp-val{width:72px;flex-shrink:0}
+.add-row .inp-cat{width:60px;flex-shrink:0}
+.add-row button{background:var(--accent);color:#0d1117;border:none;border-radius:10px;padding:10px 14px;font-weight:500;cursor:pointer;font-family:var(--font-body);font-size:18px;flex-shrink:0}
+.exp-item{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface);border-radius:12px;border:1px solid var(--border);margin-bottom:8px}
+.exp-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;background:var(--surface3)}
+.exp-info{flex:1;min-width:0}
+.exp-name{font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.exp-cat{font-size:11px;color:var(--muted);margin-top:2px}
+.exp-eur{font-size:14px;font-weight:500;color:var(--accent);flex-shrink:0}
+.exp-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;padding:0 4px;flex-shrink:0}
+.exp-del:hover{color:var(--red)}
+.exp-empty{text-align:center;color:var(--muted);font-size:13px;padding:28px;border:1px dashed var(--border);border-radius:14px;line-height:1.6}
+
+/* Checklist */
+.ck-progress{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--surface);border-radius:12px;border:1px solid var(--border);margin-bottom:14px}
+.ck-prog-txt{font-size:12px;color:var(--muted);flex:1}
+.ck-prog-cnt{font-size:13px;font-weight:500;color:var(--accent);flex-shrink:0}
+.ck-prog-bar{height:4px;background:var(--surface3);border-radius:2px;flex:2;overflow:hidden}
+.ck-prog-fill{height:100%;border-radius:2px;background:var(--green);transition:width .3s}
+.ck-section{margin-bottom:18px}
+.ck-section-title{font-size:11px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;padding-left:2px}
+.ck-item{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--surface);border-radius:12px;border:1px solid var(--border);margin-bottom:6px;cursor:pointer;user-select:none;transition:opacity .2s}
+.ck-item.done{opacity:.45}
+.ck-item.done .ck-name{text-decoration:line-through}
+.ck-box{width:20px;height:20px;border-radius:6px;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;margin-top:1px;transition:all .2s;color:white;font-weight:700}
+.ck-item.done .ck-box{background:var(--green);border-color:var(--green)}
+.ck-name{font-size:13px;font-weight:500;line-height:1.3;flex:1}
+.ck-sub{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.4}
+
+/* Bottom nav */
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(13,17,23,0.96);backdrop-filter:blur(16px);border-top:1px solid var(--border);display:flex;padding:8px 0 env(safe-area-inset-bottom,12px)}
+.bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:none;cursor:pointer;padding:4px;font-family:var(--font-body)}
+.bnav-icon{font-size:20px;line-height:1}
+.bnav-lbl{font-size:10px;color:var(--muted);font-weight:500}
+.bnav-btn.active .bnav-lbl{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <div class="header-title">Europa 2025</div>
+        <div class="header-sub">05–17 outubro · 12 dias · 4 países</div>
+      </div>
+      <div class="flag-row">🇪🇸🇫🇷🇬🇧🇧🇪</div>
+    </div>
+    <div class="nav">
+      <button class="nav-btn active" onclick="showTab('roteiro')">📅 Roteiro</button>
+      <button class="nav-btn" onclick="showTab('mapa')">🗺️ Mapa</button>
+      <button class="nav-btn" onclick="showTab('gastos')">💶 Gastos</button>
+      <button class="nav-btn" onclick="showTab('checklist')">✅ Checklist</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ROTEIRO -->
+    <div class="section active" id="sec-roteiro">
+      <div id="days-list"></div>
+    </div>
+
+    <!-- MAPA -->
+    <div class="section" id="sec-mapa">
+      <div class="map-container">
+        <div class="map-header">
+          <div class="map-title">Rota da viagem</div>
+          <div class="map-sub">Toque nas cidades para ver dicas</div>
+        </div>
+        <div class="map-svg-wrap">
+          <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+            <rect width="400" height="300" fill="#0a1628"/>
+            <!-- Europa continental simplificada -->
+            <path d="M55,275 L75,258 L95,252 L118,258 L138,248 L158,238 L168,226 L163,207 L174,192 L184,177 L189,162 L199,152 L209,142 L224,137 L238,128 L249,122 L263,117 L273,112 L283,108 L294,105 L308,102 L319,97 L328,93 L338,88 L348,86 L353,93 L348,107 L338,118 L328,128 L318,137 L313,152 L308,162 L303,172 L308,182 L303,192 L293,197 L283,207 L278,222 L268,232 L258,237 L248,242 L238,252 L228,262 L218,267 L208,272 L198,275 L188,277 L178,275 L168,273 L158,272 L148,270 L138,272 L128,275 L118,277 L108,275 L98,273 L88,275 L78,277 Z" fill="#1a2535" stroke="#2a3a50" stroke-width="0.5"/>
+            <!-- UK -->
+            <path d="M157,92 L167,87 L177,85 L185,89 L189,97 L187,107 L182,117 L175,125 L167,129 L159,125 L153,115 L152,105 L155,97 Z" fill="#1a2535" stroke="#2a3a50" stroke-width="0.5"/>
+            <!-- Irlanda -->
+            <path d="M141,102 L148,97 L154,100 L154,109 L148,115 L141,112 L138,105 Z" fill="#1a2535" stroke="#2a3a50" stroke-width="0.5"/>
+            <!-- Escandinávia simplificada -->
+            <path d="M245,45 L255,40 L265,38 L270,45 L268,58 L262,70 L255,78 L248,72 L243,60 L243,50 Z" fill="#1a2535" stroke="#2a3a50" stroke-width="0.5"/>
+            <path d="M270,42 L280,38 L290,35 L298,42 L296,55 L290,68 L283,76 L276,70 L271,58 L269,48 Z" fill="#1a2535" stroke="#2a3a50" stroke-width="0.5"/>
+
+            <!-- Linhas de rota -->
+            <line x1="176" y1="205" x2="228" y2="152" class="route-line"/>
+            <line x1="228" y1="152" x2="174" y2="115" class="route-line" stroke="#58a6ff" opacity="0.5"/>
+            <line x1="228" y1="152" x2="220" y2="145" class="route-line" stroke="#f85149" opacity="0.5"/>
+
+            <!-- Numeração de dias -->
+            <text x="190" y="182" style="font-size:8px;fill:#e8c87a;opacity:0.7;font-family:'DM Sans',sans-serif">✈ dia 1</text>
+            <text x="193" y="136" style="font-size:8px;fill:#e8c87a;opacity:0.6;font-family:'DM Sans',sans-serif">🚆 2h20</text>
+
+            <!-- Madrid -->
+            <g class="city-dot" onclick="showCityInfo('madrid')">
+              <circle cx="176" cy="205" r="8" fill="#e8c87a" opacity="0.9"/>
+              <circle cx="176" cy="205" r="14" fill="#e8c87a" opacity="0.12"/>
+              <text x="191" y="202" class="city-label">Madrid</text>
+              <text x="191" y="212" class="city-sub-lbl">06–07 out · 2 dias</text>
+            </g>
+
+            <!-- Paris -->
+            <g class="city-dot" onclick="showCityInfo('paris')">
+              <circle cx="228" cy="152" r="10" fill="#a78bfa" opacity="0.9"/>
+              <circle cx="228" cy="152" r="17" fill="#a78bfa" opacity="0.12"/>
+              <text x="243" y="149" class="city-label">Paris</text>
+              <text x="243" y="159" class="city-sub-lbl">08–15 out · 8 dias</text>
+            </g>
+
+            <!-- Versalhes -->
+            <g class="city-dot" onclick="showCityInfo('versailles')">
+              <circle cx="218" cy="162" r="4" fill="#3fb950" opacity="0.9"/>
+              <text x="224" y="166" style="font-size:8px;fill:#3fb950;font-family:'DM Sans',sans-serif">Versalhes</text>
+            </g>
+
+            <!-- Disney -->
+            <g class="city-dot" onclick="showCityInfo('disney')">
+              <circle cx="238" cy="145" r="4" fill="#fb8f44" opacity="0.9"/>
+              <text x="244" y="149" style="font-size:8px;fill:#fb8f44;font-family:'DM Sans',sans-serif">Disney</text>
+            </g>
+
+            <!-- Londres -->
+            <g class="city-dot" onclick="showCityInfo('london')">
+              <circle cx="174" cy="115" r="7" fill="#58a6ff" opacity="0.9"/>
+              <circle cx="174" cy="115" r="12" fill="#58a6ff" opacity="0.12"/>
+              <text x="186" y="112" class="city-label">Londres</text>
+              <text x="186" y="122" class="city-sub-lbl">13 out · bate-volta</text>
+            </g>
+
+            <!-- Bruxelas -->
+            <g class="city-dot" onclick="showCityInfo('brussels')">
+              <circle cx="220" cy="130" r="6" fill="#f85149" opacity="0.9"/>
+              <circle cx="220" cy="130" r="11" fill="#f85149" opacity="0.12"/>
+              <text x="230" y="127" class="city-label">Bruxelas</text>
+              <text x="230" y="137" class="city-sub-lbl">14 out · bate-volta</text>
+            </g>
+
+            <!-- Compass -->
+            <text x="18" y="28" style="font-size:20px;opacity:0.25">🧭</text>
+          </svg>
+        </div>
+        <div class="map-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#e8c87a"></div>Madrid</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#a78bfa"></div>Paris</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#58a6ff"></div>Londres</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#f85149"></div>Bruxelas</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#fb8f44"></div>Disney</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#3fb950"></div>Versalhes</div>
+        </div>
+      </div>
+
+      <div class="city-info-box" id="city-info-box">
+        <div class="city-info-name" id="cib-name"></div>
+        <div class="city-info-desc" id="cib-desc"></div>
+        <div class="city-info-tip" id="cib-tip"></div>
+      </div>
+
+      <div id="stops-list"></div>
+    </div>
+
+    <!-- GASTOS -->
+    <div class="section" id="sec-gastos">
+      <div class="budget-total">
+        <div class="budget-lbl">Total gasto (grupo)</div>
+        <div class="budget-val" id="total-eur">€ 0,00</div>
+        <div class="budget-brl" id="total-brl">R$ 0,00 · cotação €1 = R$ 5,87</div>
+        <div class="budget-bar-wrap">
+          <div class="budget-bar-head">
+            <span>Orçamento estimado p/ pessoa: € 393</span>
+            <span id="bpct">0%</span>
+          </div>
+          <div class="budget-bar-bg"><div class="budget-bar-fill" id="bbar" style="width:0%"></div></div>
+        </div>
+      </div>
+
+      <div class="cat-grid">
+        <div class="cat-card"><div class="cat-card-lbl">🍽️ Alimentação</div><div class="cat-card-val" id="c-food">€ 0</div><div class="cat-card-brl" id="c-food-b">R$ 0</div></div>
+        <div class="cat-card"><div class="cat-card-lbl">🎫 Passeios</div><div class="cat-card-val" id="c-tour">€ 0</div><div class="cat-card-brl" id="c-tour-b">R$ 0</div></div>
+        <div class="cat-card"><div class="cat-card-lbl">🚇 Transporte</div><div class="cat-card-val" id="c-trans">€ 0</div><div class="cat-card-brl" id="c-trans-b">R$ 0</div></div>
+        <div class="cat-card"><div class="cat-card-lbl">🛍️ Compras</div><div class="cat-card-val" id="c-shop">€ 0</div><div class="cat-card-brl" id="c-shop-b">R$ 0</div></div>
+      </div>
+
+      <div class="add-row">
+        <input class="inp-desc" type="text" id="e-desc" placeholder="Descrição..." />
+        <input class="inp-val" type="number" id="e-val" placeholder="€" step="0.01" min="0"/>
+        <select class="inp-cat" id="e-cat">
+          <option value="food">🍽️</option>
+          <option value="tour">🎫</option>
+          <option value="trans">🚇</option>
+          <option value="shop">🛍️</option>
+          <option value="other">📦</option>
+        </select>
+        <button onclick="addExp()">+</button>
+      </div>
+
+      <div id="exp-list"></div>
+    </div>
+
+    <!-- CHECKLIST -->
+    <div class="section" id="sec-checklist">
+      <div class="ck-progress">
+        <div class="ck-prog-txt">Itens concluídos</div>
+        <div class="ck-prog-cnt" id="ck-cnt">0/0</div>
+        <div class="ck-prog-bar"><div class="ck-prog-fill" id="ck-fill" style="width:0%"></div></div>
+      </div>
+      <div id="ck-list"></div>
+    </div>
+
+  </div>
+
+  <div class="bottom-nav">
+    <button class="bnav-btn active" id="bn-roteiro" onclick="showTab('roteiro')">
+      <span class="bnav-icon">📅</span><span class="bnav-lbl">Roteiro</span>
+    </button>
+    <button class="bnav-btn" id="bn-mapa" onclick="showTab('mapa')">
+      <span class="bnav-icon">🗺️</span><span class="bnav-lbl">Mapa</span>
+    </button>
+    <button class="bnav-btn" id="bn-gastos" onclick="showTab('gastos')">
+      <span class="bnav-icon">💶</span><span class="bnav-lbl">Gastos</span>
+    </button>
+    <button class="bnav-btn" id="bn-checklist" onclick="showTab('checklist')">
+      <span class="bnav-icon">✅</span><span class="bnav-lbl">Checklist</span>
+    </button>
+  </div>
+</div>
+
+<script>
+const EUR = 5.87;
+const BUDGET = 393;
+
+const days = [
+  {date:'05/out (dom)',name:'Saída de São Paulo',badge:'badge-voo',color:'#8b949e',note:'✈️ Voo noturno GRU → Madrid',stops:[]},
+  {date:'06/out (seg)',name:'Chegada em Madrid',badge:'badge-es',color:'#7ee787',stops:[
+    {icon:'🏛️',name:'Plaza Mayor',tip:'Ponto de encontro perfeito para o grupo. Chegada após o voo.',price:'grátis',free:true},
+    {icon:'🏰',name:'Palácio Real de Madrid',tip:'Reserve online! Maior palácio real da Europa Ocidental (~2h)',price:'€12',free:false},
+  ]},
+  {date:'07/out (ter)',name:'Arte + Futebol em Madrid',badge:'badge-es',color:'#7ee787',stops:[
+    {icon:'🖼️',name:'Museo Nacional del Prado',tip:'Gratuito das 18h–20h — se for de manhã, €15. Reserve!',price:'€0–15',free:true},
+    {icon:'🎨',name:'Museo Reina Sofía',tip:'Gratuito das 19h–21h. Guernica de Picasso ao vivo!',price:'€0–14',free:true},
+    {icon:'⚽',name:'Santiago Bernabéu',tip:'Reserve online com antecedência! Tour pós-renovação incrível',price:'€25–32',free:false},
+  ]},
+  {date:'08/out (qua)',name:'Chegada em Paris',badge:'badge-fr',color:'#79c0ff',stops:[
+    {icon:'⛪',name:'Notre-Dame de Paris',tip:'Totalmente restaurada após 2019! Entrada gratuita.',price:'grátis',free:true},
+  ]},
+  {date:'09/out (qui)',name:'Disneyland Paris 🎢',badge:'badge-fr',color:'#79c0ff',stops:[
+    {icon:'🏰',name:'Disneyland Paris',tip:'Chegue às 9h30! Leve lanches para economizar. Fique até os fogos noturnos!',price:'€60–110',free:false},
+  ]},
+  {date:'10/out (sex)',name:'Torre Eiffel + Louvre',badge:'badge-fr',color:'#79c0ff',stops:[
+    {icon:'🗼',name:'Torre Eiffel',tip:'Ver de baixo é grátis e lindo! Subir: €26 (2º andar) ou €40 (topo)',price:'€0–40',free:true},
+    {icon:'🏛️',name:'Musée du Louvre',tip:'GRATUITO hoje! É a 1ª sexta do mês — grátis a partir das 18h. Reserve horário mesmo assim!',price:'€0 🎉',free:true},
+  ]},
+  {date:'11/out (sáb)',name:"Orsay + Arc de Triomphe",badge:'badge-fr',color:'#79c0ff',stops:[
+    {icon:'🖼️',name:"Musée d'Orsay",tip:'Monet, Van Gogh, Renoir em pessoa! Gratuito no 1º domingo do mês',price:'€16',free:false},
+    {icon:'🏛️',name:'Arc de Triomphe',tip:'Subir ao topo €13. Vista espetacular dos Champs-Élysées ao entardecer!',price:'€13',free:false},
+  ]},
+  {date:'12/out (dom)',name:'Palácio de Versalhes',badge:'badge-fr',color:'#79c0ff',stops:[
+    {icon:'🏰',name:'Palácio de Versalhes',tip:'Compre online com antecedência! Jardins gratuitos fora dos dias de fontes musicais',price:'€21',free:false},
+  ]},
+  {date:'13/out (seg)',name:'Bate-volta Londres 🇬🇧',badge:'badge-uk',color:'#ffa657',stops:[
+    {icon:'🚆',name:'Eurostar Paris → Londres ida/volta',tip:'Trem das ~7h, chegada ~10h30 (horário local UK = -1h). PRECISA DE VISTO BRITÂNICO!',price:'€78–86',free:false},
+    {icon:'🕰️',name:'Big Ben + Houses of Parliament',tip:'Gratuito ver de fora às margens do Tâmisa',price:'grátis',free:true},
+    {icon:'👑',name:'Buckingham Palace',tip:'Troca da Guarda ~11h (verificar calendário). Gratuito ver de fora',price:'grátis',free:true},
+    {icon:'🌉',name:'Tower Bridge',tip:'Opcional: interior com piso de vidro ~£14. A ponte de fora já é linda!',price:'opcional',free:false},
+  ]},
+  {date:'14/out (ter)',name:'Bate-volta Bruxelas 🇧🇪',badge:'badge-be',color:'#d2a8ff',stops:[
+    {icon:'🚆',name:'Thalys/Eurostar Paris → Bruxelas ida/volta',tip:'Apenas 1h22 de viagem! Reserve com antecedência para tarifas mínimas',price:'€39–53',free:false},
+    {icon:'🏛️',name:'Grand Place',tip:'Uma das praças mais bonitas da Europa — de graça! Linda à noite iluminada',price:'grátis',free:true},
+    {icon:'🚿',name:'Manneken Pis',tip:'A famosa estátua fica a 5 minutos a pé da Grand Place',price:'grátis',free:true},
+    {icon:'⚛️',name:'Atomium',tip:'Ícone futurista de 1958 com vista panorâmica de Bruxelas',price:'€17',free:false},
+  ]},
+  {date:'15/out (qua)',name:'Dia livre em Paris 🎉',badge:'badge-livre',color:'#e3b341',stops:[
+    {icon:'⛪',name:'Montmartre + Sacré-Cœur',tip:'Vista panorâmica gratuita de Paris! Vá cedo para evitar multidões',price:'grátis',free:true},
+    {icon:'🏘️',name:'Le Marais',tip:'Bairro histórico com galerias, lojas e cafés charmosos',price:'livre',free:true},
+    {icon:'🛍️',name:'Compras e exploração livre',tip:'Aproveite para souvenirs, boulangeries e cafés parisienses',price:'livre',free:true},
+  ]},
+  {date:'16/out (qui)',name:'Volta para São Paulo',badge:'badge-voo',color:'#8b949e',note:'✈️ Voo Paris CDG → GRU',stops:[]},
+];
+
+const cityData = {
+  madrid:{name:'Madrid 🇪🇸',desc:'Capital da Espanha. Dias 06–07/out (2 dias).',tip:'💡 O metrô de Madrid é simples e barato. Passe de 10 viagens ~€12. Greve às quartas nos museus gratuitos!',color:'#e8c87a'},
+  paris:{name:'Paris 🇫🇷',desc:'Capital da França. Dias 08–15/out (8 dias).',tip:'💡 Passe Navigo Découverte semanal ~€30 — cobre metrô, ônibus e RER ilimitado a semana toda!',color:'#a78bfa'},
+  london:{name:'Londres 🇬🇧',desc:'Bate-volta de trem. 13/out (1 dia).',tip:'⚠️ Precisa de VISTO BRITÂNICO! Solicite com meses de antecedência. Moeda: libra (£ ≠ €). Use cartão para não pagar taxa de câmbio.',color:'#58a6ff'},
+  brussels:{name:'Bruxelas 🇧🇪',desc:'Bate-volta de trem. 14/out (1 dia).',tip:'💡 No espaço Schengen — sem visto extra! Experimente waffles belgas, cervejas e chocolates na Grand Place.',color:'#f85149'},
+  disney:{name:'Disneyland Paris 🎢',desc:'09/out — Dia inteiro no parque!',tip:'💡 Compre ingressos online com 2–3 meses de antecedência. Leve lanches para economizar. Fique até os fogos!',color:'#fb8f44'},
+  versailles:{name:'Palácio de Versalhes 🏰',desc:'12/out — Excursão de dia inteiro.',tip:'💡 Compre online (€21). Jardins gratuitos fora dos dias de fontes (sáb/dom em alta temporada). Chegue cedo!',color:'#3fb950'},
+};
+
+const checks = [
+  {title:'📋 Documentos obrigatórios',items:[
+    {name:'Passaporte válido',sub:'Validade mínima de 6 meses além da data de volta'},
+    {name:'Visto Schengen',sub:'Para Espanha, França e Bélgica — solicite no consulado com antecedência'},
+    {name:'Visto britânico (UK)',sub:'SEPARADO do Schengen — para o bate-volta de Londres (13/out)'},
+    {name:'Seguro viagem',sub:'Exigido para obter visto Schengen. Cobertura mínima €30.000'},
+    {name:'Carteira de vacinação',sub:'Incluindo febre amarela'},
+    {name:'Cópias digitais de todos os docs',sub:'Salve no Google Drive / iCloud e compartilhe com o grupo'},
+  ]},
+  {title:'🎫 Reservas — Faça com antecedência!',items:[
+    {name:'Voos GRU → Madrid e Paris → GRU',sub:'Reserve o quanto antes para melhores preços'},
+    {name:'Voo Madrid → Paris (08/out)',sub:'Confirmar horário — saída antes do meio-dia'},
+    {name:'Hospedagem Madrid — 2 noites',sub:'Noites de 06 e 07/out'},
+    {name:'Hospedagem Paris — 7 noites',sub:'Noites de 08 a 14/out'},
+    {name:'Disneyland Paris (09/out)',sub:'Reserve 2–3 meses antes — preço cai bastante!'},
+    {name:'Eurostar Paris → Londres (13/out)',sub:'Ida e volta — reserve com antecedência para €39+/trecho'},
+    {name:'Thalys Paris → Bruxelas (14/out)',sub:'Ida e volta — apenas 1h22. Tarifas mínimas esgotam rápido'},
+    {name:'Palácio Real de Madrid',sub:'€12 — compre online para evitar filas'},
+    {name:'Santiago Bernabéu tour',sub:'€25–32 — esgota rápido! Reserve no site oficial'},
+    {name:'Musée du Louvre',sub:'Gratuito na 1ª sexta (10/out) mas reserve horário mesmo assim!'},
+    {name:'Palácio de Versalhes',sub:'€21 — compre online. Chegue antes da abertura'},
+    {name:'Torre Eiffel (subida — opcional)',sub:'€26 (2º andar) ou €40 (topo) — reserve online se quiser subir'},
+  ]},
+  {title:'🧳 Na mala',items:[
+    {name:'Adaptador de tomada Tipo C',sub:'Para Espanha, França e Bélgica (tomadas europeias)'},
+    {name:'Adaptador Tipo G (para UK)',sub:'Para o dia em Londres — tomada britânica é diferente!'},
+    {name:'Carregador portátil (power bank)',sub:'Essencial para o dia inteiro na Disneyland'},
+    {name:'Casaco impermeável',sub:'Paris em outubro costuma ter chuva e frio (~10–16°C)'},
+    {name:'Sapatos confortáveis para caminhar',sub:'Muita caminhada todos os dias — sapatos fechados'},
+    {name:'Cartão de crédito internacional',sub:'Mastercard ou Visa. Avise o banco sobre a viagem para não bloquear'},
+    {name:'Dinheiro em espécie (euros + libras)',sub:'Libras para Londres, euros para os demais países'},
+    {name:'Download offline do Google Maps',sub:'Baixe mapas de Madrid, Paris, Londres e Bruxelas sem internet'},
+  ]},
+  {title:'📱 Antes de embarcar',items:[
+    {name:'Chip internacional ou eSIM europeu',sub:'Recomendado: Airalo ou eSIM de operadora local'},
+    {name:'Navigo Découverte Paris',sub:'Compre na chegada em Paris — semana ilimitada ~€30'},
+    {name:'Verificar horário da Troca da Guarda',sub:'Buckingham Palace — 13/out (verificar calendário oficial)'},
+    {name:'Comunicar o banco/operadora do cartão',sub:'Avisar sobre uso no exterior para não bloquear o cartão'},
+    {name:'Baixar app de tradução offline',sub:'Google Translate com pacotes de espanhol, francês e inglês'},
+  ]},
+];
+
+let expenses = [];
+let ckState = {};
+const catIcons = {food:'🍽️',tour:'🎫',trans:'🚇',shop:'🛍️',other:'📦'};
+const catNames = {food:'Alimentação',tour:'Passeios',trans:'Transporte',shop:'Compras',other:'Outros'};
+
+function renderDays(){
+  const el = document.getElementById('days-list');
+  el.innerHTML = days.map((d,i)=>{
+    const bdgText = {
+      'badge-es':'ES 🇪🇸','badge-fr':'FR 🇫🇷','badge-uk':'UK 🇬🇧',
+      'badge-be':'BE 🇧🇪','badge-voo':'VOO ✈️','badge-livre':'LIVRE'
+    }[d.badge]||'';
+    return `<div class="day-item" id="di-${i}">
+      <div class="day-header" onclick="toggleDay(${i})">
+        <div class="day-dot" style="background:${d.color}"></div>
+        <div class="day-num">${String(i+1).padStart(2,'0')}</div>
+        <div class="day-info">
+          <div class="day-name">${d.name}</div>
+          <div class="day-date">${d.date}</div>
+        </div>
+        <span class="day-badge ${d.badge}">${bdgText}</span>
+        <span class="day-arrow">▼</span>
+      </div>
+      ${(d.stops.length||d.note)?`<div class="day-body">
+        ${d.note?`<div class="day-note">${d.note}</div>`:''}
+        ${d.stops.map(s=>`<div class="stop">
+          <div class="stop-icon">${s.icon}</div>
+          <div class="stop-info">
+            <div class="stop-name">${s.name}</div>
+            <div class="stop-tip">${s.tip}</div>
+          </div>
+          <div class="stop-price ${s.free?'tag-free':'tag-paid'}">${s.price}</div>
+        </div>`).join('')}
+      </div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function toggleDay(i){
+  document.getElementById('di-'+i).classList.toggle('open');
+}
+
+function renderStopCards(){
+  const cities = [
+    {flag:'🇪🇸',name:'Madrid',days:'06–07/out · 2 dias',cost:'€37–57',items:'Plaza Mayor, Palácio Real, Prado, Reina Sofía, Bernabéu'},
+    {flag:'🇫🇷',name:'Paris',days:'08–15/out · 8 dias',cost:'€110–180',items:'Notre-Dame, Disneyland, Torre Eiffel, Louvre, Orsay, Arc, Versalhes'},
+    {flag:'🇬🇧',name:'Londres',days:'13/out · bate-volta',cost:'€78–100',items:'Big Ben, Buckingham Palace, Tower Bridge'},
+    {flag:'🇧🇪',name:'Bruxelas',days:'14/out · bate-volta',cost:'€56–70',items:'Grand Place, Manneken Pis, Atomium'},
+  ];
+  document.getElementById('stops-list').innerHTML = cities.map(c=>`
+    <div class="stop-card">
+      <div class="stop-flag">${c.flag}</div>
+      <div class="stop-card-info">
+        <div class="stop-card-name">${c.name} · ${c.days}</div>
+        <div class="stop-card-days">${c.items}</div>
+      </div>
+      <div class="stop-card-cost">${c.cost}</div>
+    </div>
+  `).join('');
+}
+
+function showCityInfo(id){
+  const c = cityData[id];
+  if(!c) return;
+  const box = document.getElementById('city-info-box');
+  box.style.display='block';
+  box.style.borderColor = c.color+'55';
+  document.getElementById('cib-name').textContent = c.name;
+  document.getElementById('cib-name').style.color = c.color;
+  document.getElementById('cib-desc').textContent = c.desc;
+  document.getElementById('cib-tip').textContent = c.tip;
+}
+
+function addExp(){
+  const desc = document.getElementById('e-desc').value.trim();
+  const val = parseFloat(document.getElementById('e-val').value);
+  const cat = document.getElementById('e-cat').value;
+  if(!desc||isNaN(val)||val<=0) return;
+  expenses.push({desc,val,cat,id:Date.now()});
+  document.getElementById('e-desc').value='';
+  document.getElementById('e-val').value='';
+  renderExpenses();
+}
+
+function delExp(id){
+  expenses = expenses.filter(e=>e.id!==id);
+  renderExpenses();
+}
+
+function renderExpenses(){
+  const total = expenses.reduce((s,e)=>s+e.val,0);
+  document.getElementById('total-eur').textContent = '€ '+total.toFixed(2);
+  document.getElementById('total-brl').textContent = 'R$ '+(total*EUR).toFixed(2)+' · cotação €1 = R$ 5,87';
+  const pct = Math.min(100,Math.round(total/BUDGET*100));
+  document.getElementById('bpct').textContent = pct+'%';
+  const bar = document.getElementById('bbar');
+  bar.style.width = pct+'%';
+  bar.style.background = pct>90?'var(--red)':pct>70?'var(--orange)':'var(--accent)';
+
+  const cats = {food:0,tour:0,trans:0,shop:0};
+  expenses.forEach(e=>{if(cats[e.cat]!==undefined)cats[e.cat]+=e.val;});
+  ['food','tour','trans','shop'].forEach(k=>{
+    document.getElementById('c-'+k).textContent='€ '+cats[k].toFixed(0);
+    document.getElementById('c-'+k+'-b').textContent='R$ '+(cats[k]*EUR).toFixed(0);
+  });
+
+  const list = document.getElementById('exp-list');
+  if(!expenses.length){
+    list.innerHTML='<div class="exp-empty">Nenhum gasto ainda ✈️<br>Adicione suas despesas acima para controlar o orçamento da viagem!</div>';
+    return;
+  }
+  list.innerHTML=[...expenses].reverse().map(e=>`
+    <div class="exp-item">
+      <div class="exp-icon">${catIcons[e.cat]||'📦'}</div>
+      <div class="exp-info">
+        <div class="exp-name">${e.desc}</div>
+        <div class="exp-cat">${catNames[e.cat]||'Outros'} · R$ ${(e.val*EUR).toFixed(2)}</div>
+      </div>
+      <div class="exp-eur">€ ${e.val.toFixed(2)}</div>
+      <button class="exp-del" onclick="delExp(${e.id})">×</button>
+    </div>
+  `).join('');
+}
+
+function renderChecklist(){
+  let allKeys=[];
+  checks.forEach(sec=>sec.items.forEach((_,i)=>{
+    const k=sec.title+i;
+    if(ckState[k]===undefined)ckState[k]=false;
+    allKeys.push(k);
+  }));
+  const done=allKeys.filter(k=>ckState[k]).length;
+  const total=allKeys.length;
+  document.getElementById('ck-cnt').textContent=done+'/'+total;
+  document.getElementById('ck-fill').style.width=(total?Math.round(done/total*100):0)+'%';
+
+  document.getElementById('ck-list').innerHTML=checks.map(sec=>`
+    <div class="ck-section">
+      <div class="ck-section-title">${sec.title}</div>
+      ${sec.items.map((item,i)=>{
+        const k=sec.title+i;
+        const ok=ckState[k];
+        return `<div class="ck-item${ok?' done':''}" onclick="toggleCk('${k}')">
+          <div class="ck-box">${ok?'✓':''}</div>
+          <div>
+            <div class="ck-name">${item.name}</div>
+            <div class="ck-sub">${item.sub}</div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+  `).join('');
+}
+
+function toggleCk(k){
+  ckState[k]=!ckState[k];
+  renderChecklist();
+}
+
+function showTab(tab){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('sec-'+tab).classList.add('active');
+  document.querySelector(`.nav-btn[onclick="showTab('${tab}')"]`).classList.add('active');
+  document.getElementById('bn-'+tab).classList.add('active');
+}
+
+// Init
+renderDays();
+renderStopCards();
+renderExpenses();
+renderChecklist();
+</script>
+</body>
+</html>
